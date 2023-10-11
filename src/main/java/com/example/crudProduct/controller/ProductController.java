@@ -3,6 +3,7 @@ package com.example.crudProduct.controller;
 import com.example.crudProduct.domain.product.Product;
 import com.example.crudProduct.domain.product.ProductRepository;
 import com.example.crudProduct.domain.product.RequestProduct;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +31,7 @@ public class ProductController {
         return ResponseEntity.ok().build();
     }
     @PutMapping
+    @Transactional
     public ResponseEntity updateProduct(@RequestBody @Validated RequestProduct data){
         Optional<Product> optionalProduc =repository.findById(data.id());
         if (optionalProduc.isPresent()) {
@@ -38,7 +40,7 @@ public class ProductController {
             product.setPrice_in_cents(data.price_in_cents());
             return ResponseEntity.ok(product);
         }else {
-            return ResponseEntity.notFound().build();
+            throw new EntityNotFoundException();
         }
     }
 
@@ -51,7 +53,7 @@ public class ProductController {
             product.setActive(false);
             return ResponseEntity.noContent().build();
         }else {
-            return ResponseEntity.notFound().build();
+            throw new EntityNotFoundException();
         }
     }
 }
