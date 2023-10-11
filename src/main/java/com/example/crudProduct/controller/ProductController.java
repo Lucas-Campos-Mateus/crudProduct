@@ -6,6 +6,7 @@ import com.example.crudProduct.domain.product.RequestProduct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +19,7 @@ public class ProductController {
     private ProductRepository repository;
     @GetMapping
     public ResponseEntity getAllProduct(){
-        var allProducts = repository.findAll();
+        var allProducts = repository.findAllByActiveTrue();
     return ResponseEntity.ok(allProducts);
     }
 
@@ -42,8 +43,15 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
+    @Transactional
     public ResponseEntity deleteProduct(@PathVariable String id){
-        repository.deleteById(id);
-        return ResponseEntity.noContent().build();
+        Optional<Product> optionalProduc =repository.findById(id);
+        if (optionalProduc.isPresent()) {
+            Product product = optionalProduc.get();
+            product.setActive(false);
+            return ResponseEntity.noContent().build();
+        }else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
